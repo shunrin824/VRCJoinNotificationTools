@@ -29,7 +29,7 @@ foreach (string file in files)
     }
 }
 
-int LineCnt = 0;
+int LineCnt = 1;
 int TimeNotification = 0;
 int NumberOfPlayer = 0;
 while (true)
