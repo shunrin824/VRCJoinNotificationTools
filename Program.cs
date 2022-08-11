@@ -2,44 +2,118 @@
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
-public class Hello
+using XSNotifications;
+using XSNotifications.Enum;
+
+using BuildSoft.VRChat.Osc;
+
+
+// 指定されたフォルダ内のdatファイル名をすべて取得する
+string[] files = System.IO.Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\AppData\\LocalLow\\VRChat\\VRChat", "*.txt", System.IO.SearchOption.TopDirectoryOnly);
+
+string newestFileName = string.Empty;
+System.DateTime updateTime = System.DateTime.MinValue;
+foreach (string file in files)
 {
-    public static void Main()
+    // それぞれのファイルの更新日付を取得する
+    System.IO.FileInfo fi = new System.IO.FileInfo(file);
+    // 更新日付が最新なら更新日付とファイル名を保存する
+    if (fi.LastWriteTime > updateTime)
     {
-        // 初期化
-        int line_cnt = 0;
-        string line;
-        List<string> mylist = new List<string>();
+        updateTime = fi.LastWriteTime;
+        newestFileName = file;
+    }
+}
 
-        // ファイルを開く
-        while (true)
+int LineCnt = 0;
+int TimeNotification = 0;
+int NumberOfPlayer = 0;
+while (true)
+{
+    using (var fs = File.Open("C:\\Users\\zyano\\AppData\\LocalLow\\VRChat\\VRChat\\"+ System.IO.Path.GetFileName(newestFileName), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+    {
+        using (TextReader reader = new StreamReader(fs, Encoding.GetEncoding("UTF-8")))
         {
-            int file_line_cnt = 0;
-            using (StreamReader sr = new StreamReader("C:\\Users\\zyano\\vrclog.txt"))
+            int LineCntFile = 0;
+            int JoinNotification = 0;
+            int LeftNotification = 0;
+            int UrlNotification = 0;
+            string JoinData = "";
+            string LeftData = "";
+            string UrlData = "";
+            string[] LogData = reader.ReadToEnd().Split('\n');
+            foreach (string LogDataLine in LogData)
             {
-                // ファイルの内容を1行ずつ読み込み
-                while ((line = sr.ReadLine()) != null)
+                if (LineCnt == LineCntFile)
                 {
-                    if (line_cnt <= file_line_cnt)
+                    if (LogDataLine.Contains("[Behaviour] OnPlayerJoined"))
                     {
-                        line_cnt++;
-                        if (line.Contains("[Behaviour] OnPlayerJoined"))
-                        {
-                            Console.WriteLine(line);
-                        }
-                        else if (line.Contains("[Behaviour] OnPlayerLeftRoom"))
-                        {
-                        }
-                        else if (line.Contains("[Behaviour] OnPlayerLeft"))
-                        {
-                            Console.WriteLine(line);
-                        }
+                        NumberOfPlayer++;
+                        Console.WriteLine(LogDataLine.Substring(0,4) + "-" + LogDataLine.Substring(5,2) + "-" + LogDataLine.Substring(8,2) + "_" + LogDataLine.Substring(11,8) + " [Join] " + string.Format("[{0,2}] ", NumberOfPlayer) + LogDataLine.Substring(61));
+                        JoinData = string.Concat(JoinData, "[" + LogDataLine.Substring(61) + "]");
+                        JoinNotification = 1;
+                        OscParameter.SendAvatarParameter("nsfw", false);
                     }
-                    file_line_cnt++;
+                    else if (LogDataLine.Contains("[Behaviour] OnPlayerLeftRoom"))
+                    {
+                    }
+                    else if (LogDataLine.Contains("[Behaviour] OnPlayerLeft"))
+                    {
+                        NumberOfPlayer--;
+                        Console.WriteLine(LogDataLine.Substring(0, 4) + "-" + LogDataLine.Substring(5, 2) + "-" + LogDataLine.Substring(8, 2) + "_" + LogDataLine.Substring(11, 8) + " [Left] " + string.Format("[{0,2}] ", NumberOfPlayer) + LogDataLine.Substring(59));
+                        LeftData = string.Concat(LeftData, "[" + LogDataLine.Substring(59) + "]");
+                        LeftNotification = 1;
+                    }
+                    else if (LogDataLine.Contains("Joining or Creating Room"))
+                    {
+                        NumberOfPlayer = 0;
+                    }
+                    else if (LogDataLine.Contains("Attempting to resolve URL"))
+                    {
+                        Console.WriteLine(LogDataLine.Substring(0, 4) + "-" + LogDataLine.Substring(5, 2) + "-" + LogDataLine.Substring(8, 2) + "_" + LogDataLine.Substring(11, 8) + " [URL_] " + LogDataLine.Substring(77));
+                        UrlData = string.Concat(UrlData, LogDataLine.Substring(77));
+                        UrlNotification = 1;
+                    }
+                    LineCnt++;
+                }
+                LineCntFile++;
+            }
+            int NowTime;
+            int.TryParse(DateTime.Now.ToString("mm"), out NowTime);
+            if (NowTime == 00)
+            {
+                if(TimeNotification == 0)
+                {
+                    TimeNotification++;
+                    new XSNotifier().SendNotification(new XSNotification() { Title = DateTime.Now.ToString("HHmm"), Content = "現在の時間は" + DateTime.Now.ToString("HH時mm分") + "です" });
                 }
             }
-            Thread.Sleep(100);
+            if (JoinNotification == 1)
+            {
+                new XSNotifier().SendNotification(new XSNotification() { Title = "Join [" + NumberOfPlayer.ToString() + "]", Content = JoinData });
+                if (NumberOfPlayer > 20)
+                {
+                    new XSNotifier().SendNotification(new XSNotification() { Title = "There are over 20 people in this instance.", Content = NumberOfPlayer.ToString() });
+                }
+            }
+            if(LeftNotification == 1)
+            {
+                new XSNotifier().SendNotification(new XSNotification() { Title = "Left ["+NumberOfPlayer.ToString()+"]", Content = LeftData });
+                if (NumberOfPlayer > 20)
+                {
+                    new XSNotifier().SendNotification(new XSNotification() { Title = "There are over 20 people in this instance.", Content = NumberOfPlayer.ToString() });
+                }
+            }
+            if (UrlNotification == 1)
+            {
+                new XSNotifier().SendNotification(new XSNotification() { Title = "URL", Content = UrlData, }) ;
+            }
+
         }
     }
+    Thread.Sleep(100);
 }

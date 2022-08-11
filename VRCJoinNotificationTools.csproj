@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="VRCOscLib" Version="1.2.1" />
+    <PackageReference Include="XSNotifications" Version="0.1.2" />
+  </ItemGroup>
+
 </Project>
