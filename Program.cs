@@ -34,7 +34,8 @@ int TimeNotification = 0;
 int NumberOfPlayer = 0;
 while (true)
 {
-    using (var fs = File.Open("C:\\Users\\zyano\\AppData\\LocalLow\\VRChat\\VRChat\\"+ System.IO.Path.GetFileName(newestFileName), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+    LineCnt--;
+    using (var fs = File.Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\AppData\\LocalLow\\VRChat\\VRChat\\" + System.IO.Path.GetFileName(newestFileName), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
     {
         using (TextReader reader = new StreamReader(fs, Encoding.GetEncoding("UTF-8")))
         {
