@@ -59,6 +59,7 @@ while (true)
                         JoinData = string.Concat(JoinData, "[" + LogDataLine.Substring(61) + "]");
                         JoinNotification = 1;
                         //OscParameter.SendAvatarParameter("nsfw", false);
+                        /*
                         if(File.Exists(JNTdataLink)) 
                         {
                             using (var userdata = File.Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\JoinNotificater.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -109,6 +110,7 @@ while (true)
                         {
                             new XSNotifier().SendNotification(new XSNotification() { Title = "[" + NumberOfPlayer.ToString() + "]Join [" + LogDataLine.Substring(61) + "]", Content = usercomment, Timeout = (float)0.3 });
                         }
+                        { */
                     }
                     else if (LogDataLine.Contains("[Behaviour] OnPlayerLeftRoom"))
                     {
@@ -133,18 +135,20 @@ while (true)
                     }
                     else if (LogDataLine.Contains("[VRC Camera] Took screenshot to"))
                     {
-                        Console.WriteLine(LogDataLine.Substring(67));
-                        using (var httpClient = new HttpClient())
-                        {
-                            using (var request = new HttpRequestMessage(new HttpMethod("POST"), "http://192.168.0.22/vrc_log.php"))
+                        if (LogDataLine.Contains("png")){
+                            Console.WriteLine(LogDataLine.Substring(67));
+                            using (var httpClient = new HttpClient())
                             {
-                                File.Copy(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\AppData\\LocalLow\\VRChat\\VRChat\\" + System.IO.Path.GetFileName(newestFileName), Path.GetTempPath() + "log.txt", true);
-                                var multipartContent = new MultipartFormDataContent();
-                                multipartContent.Add(new ByteArrayContent(File.ReadAllBytes(Path.GetTempPath() + "log.txt")), "log", Path.GetFileName(Path.GetTempPath() + "log.txt"));
-                                multipartContent.Add(new ByteArrayContent(File.ReadAllBytes(LogDataLine.Substring(67))), "file", Path.GetFileName(LogDataLine.Substring(67)));
-                                request.Content = multipartContent;
+                                using (var request = new HttpRequestMessage(new HttpMethod("POST"), "http://192.168.0.22/vrc_log.php"))
+                                {
+                                    File.Copy(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\AppData\\LocalLow\\VRChat\\VRChat\\" + System.IO.Path.GetFileName(newestFileName), Path.GetTempPath() + "log.txt", true);
+                                    var multipartContent = new MultipartFormDataContent();
+                                    multipartContent.Add(new ByteArrayContent(File.ReadAllBytes(Path.GetTempPath() + "log.txt")), "log", Path.GetFileName(Path.GetTempPath() + "log.txt"));
+                                    multipartContent.Add(new ByteArrayContent(File.ReadAllBytes(LogDataLine.Substring(67))), "file", Path.GetFileName(LogDataLine.Substring(67)));
+                                    request.Content = multipartContent;
 
-                                var response = await httpClient.SendAsync(request);
+                                    var response = await httpClient.SendAsync(request);
+                                }
                             }
                         }
                     }
@@ -161,20 +165,20 @@ while (true)
                     TimeNotification++;
                     new XSNotifier().SendNotification(new XSNotification() { Title = DateTime.Now.ToString("HHmm"), Content = "現在の時間は" + DateTime.Now.ToString("HH時mm分") + "です" });
                 }
-            }/*
+            }
             if (JoinNotification == 1)
             {
                 new XSNotifier().SendNotification(new XSNotification() { Title = "Join [" + NumberOfPlayer.ToString() + "]", Content = JoinData });
 
-            }*/
+            }
             if (LeftNotification == 1)
             {
                 new XSNotifier().SendNotification(new XSNotification() { Title = "Left [" + NumberOfPlayer.ToString() + "]", Content = LeftData });
-            }/*
+            }
             if (UrlNotification == 1)
             {
                 new XSNotifier().SendNotification(new XSNotification() { Title = "URL", Content = UrlData, });
-            }*/
+            }
 
         }
     }
