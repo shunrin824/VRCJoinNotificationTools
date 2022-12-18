@@ -59,58 +59,7 @@ while (true)
                         JoinData = string.Concat(JoinData, "[" + LogDataLine.Substring(61) + "]");
                         JoinNotification = 1;
                         //OscParameter.SendAvatarParameter("nsfw", false);
-                        /*
-                        if(File.Exists(JNTdataLink)) 
-                        {
-                            using (var userdata = File.Open(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\JoinNotificater.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                            {
-                                using (TextReader userdatatxt = new StreamReader(userdata, Encoding.GetEncoding("UTF-8")))
-                                {
-                                    string[] udt = userdatatxt.ReadToEnd().Split('\n');
-                                    foreach (string udtl in udt)
-                                    {
-                                        if (udtl != null)
-                                        {
-                                            int len = LogDataLine.Substring(61).Length;
-                                            if (udtl.Length > len)
-                                            {
-                                                if (udtl.Substring(0, len) == LogDataLine.Substring(61))
-                                                {
-                                                    usercomment = udtl.Substring(len + 1);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if(usercomment == "none")
-                            {
-                                using (var writer = new StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\JoinNotificater.txt", true))
-                                {
-                                    writer.WriteLine(LogDataLine.Substring(61) + ",");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            using (File.Create(JNTdataLink))
-                            {
-
-                            }
-                            using (var writer = new StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\JoinNotificater.txt", true))
-                            {
-                                writer.WriteLine(LogDataLine.Substring(61) + ",");
-                            }
-                        }
-                        if (usercomment == "none")
-                        {
-                            new XSNotifier().SendNotification(new XSNotification() { Title = "[" + NumberOfPlayer.ToString() + "]Join [" + LogDataLine.Substring(61) + "]", Content = "No data.", Timeout = (float)0.3 });
-                        }
-                        else
-                        {
-                            new XSNotifier().SendNotification(new XSNotification() { Title = "[" + NumberOfPlayer.ToString() + "]Join [" + LogDataLine.Substring(61) + "]", Content = usercomment, Timeout = (float)0.3 });
-                        }
-                        { */
+                        
                     }
                     else if (LogDataLine.Contains("[Behaviour] OnPlayerLeftRoom"))
                     {
